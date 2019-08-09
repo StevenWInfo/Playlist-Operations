@@ -12,8 +12,9 @@ import java.io.FileWriter
 object PlaylistSetOperations {
   def main(args: Array[String]) {
     val firstListName = args(0)
-    val secondListName = args(1)
-    val outputListName = args(2)
+    val operation = args(1)
+    val secondListName = args(2)
+    val outputListName = args(3)
 
     val firstSource = io.Source.fromFile(firstListName)
     val firstLines = try source.mkString finally source.close()
@@ -21,7 +22,12 @@ object PlaylistSetOperations {
     val secondSource = io.Source.fromFile(secondListName)
     val secondLines = try source.mkString finally source.close()
 
-    // Look for EXTM3U at top to see if extended M3U
+    val firstList = M3U.parseM3U(firstLines)
+    val secondList = M3U.parseM3U(secondLines)
+
+    val resultList = operation match {
+      case "union" => M3U.union(firstList, secondList)
+    }
 
     /* TODO
     val finalList = ""

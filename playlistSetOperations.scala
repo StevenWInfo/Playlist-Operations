@@ -21,6 +21,8 @@ object PlaylistSetOperations {
     val secondSource = io.Source.fromFile(secondListName)
     val secondLines = try source.mkString finally source.close()
 
+    // Look for EXTM3U at top to see if extended M3U
+
     /* TODO
     val finalList = ""
     val newFile = new File(outputListName)
@@ -29,9 +31,4 @@ object PlaylistSetOperations {
     bufferedWriter.close()
      */
   }
-}
-
-/** All the messages that are output.
- */
-object Messages {
 }

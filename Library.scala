@@ -14,6 +14,7 @@ object Messages {
     Union: Unions two playlists.
     Intersect: Intersects two playlists.
   """
+  val unrecognizedOperation = "Set operation not recognized. Type in the help command to list all available operations."
 }
 
 class SongData(info: String, filePath: String) {
@@ -29,7 +30,7 @@ class SongData(info: String, filePath: String) {
 class EM3U(songs: List[SongData]) {
   val songs = songs
 
-  def toFileString(): String = EM3U.header + songs.mkString(EM3U.newline)
+  def toFileString(): String = EM3U.header + songs.map(song => song.toFileString()).mkString(EM3U.newline)
 }
 
 object EM3U {

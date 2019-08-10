@@ -1,5 +1,16 @@
 package playlistSetOperations
 
+/*
+ * I know I should put most of these in different files.
+ * My defense is that it's my first time coding with Scala.
+ */
+
+/** For dealing with command line stuff.
+ */
+object CommandLine {
+  def checkCommand(firstArg): Either[String, Unit] = if (firstArg == "help" || firstArg == "") Left(Messages.help)
+}
+
 /** All the messages that are output.
  */
 object Messages {
@@ -17,6 +28,8 @@ object Messages {
 
   val unrecognizedOperation = "Set operation not recognized. Type in the help command to list all available operations."
 
+  val fileNotFound = "Unable to find file %s"
+
   // TODO Need messages for invalid arguments.
 }
 
@@ -24,7 +37,7 @@ class SongData(info: String, filePath: String) {
   val info = info
   val filePath = filePath
 
-  def toFileString(): String = info + EM3U.newline + filePath
+  def toFileString(): String = info ++ EM3U.newline ++ filePath
 }
 
 /**
@@ -33,7 +46,7 @@ class SongData(info: String, filePath: String) {
 class EM3U(songs: List[SongData]) {
   val songs = songs
 
-  def toFileString(): String = EM3U.header + songs.map(_.toFileString()).mkString(EM3U.newline)
+  def toFileString(): String = EM3U.header ++ songs.map(_.toFileString()).mkString(EM3U.newline)
 }
 
 object EM3U {
@@ -55,10 +68,15 @@ object EM3U {
   }
 }
 
+/**
+ * Wanted to put operation between file names, however
+ * I realized it conflicted with other potential first commands.
+ * Potentially change later.
+ */
 object Validate {
-  def args(args): Either[String, Array[String]] {
-    val firstListName = args(0)
-    val operation = args(1)
+  def operatorArgs(args): Either[String, Array[String]] {
+    val operation = args(0)
+    val firstListName = args(1)
     val secondListName = args(2)
     val outputListName = args(3)
 

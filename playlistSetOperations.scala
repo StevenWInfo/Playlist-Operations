@@ -1,6 +1,7 @@
 package playlistSetOperations
 
 import java.io.FileWriter
+import java.io.{FileNotFoundException, IOException}
 
 /*
  * This is my first time writing Scala code so I'm sure that this could probably
@@ -18,45 +19,58 @@ import java.io.FileWriter
 object PlaylistSetOperations {
   def main(args: Array[String]) {
 
-    // For more complex CLI it could also return something that would let the rest of the code switch how it is operating.
-    for {
-      validArgs <-Validate.args(args)
-      firstListName = args(0)
-      operation = args(1)
-      secondListName = args(2)
-      outputListName = args(3)
-      catching(classOf[The two file exceptions], classOf[]).opt(io.Source.fromFile(firstListName).getLines.filter(!_.isEmpty())).andFinally(_.close())
-      catchind(classOf[], classOf[]).opt(io.Source.fromFile(secondListName).getLines().filter(!_.isEmpty())).andFinally(_.close())
+    /**
+     * Perhaps this and the other functions in here should be in some
+     * utility Singleton or something.
+     */
+    def getContents(filename: String): Either[String, List[String]] {
+      val theFile = io.Source.fromFile(filename)
+      try {
+        Right(theFile.getLines().filter(!_.isEmpty()))
+      } catch {
+        case e: FileNotFoundException => Left(String.format(Messages.fileNotFound, filename))
+      } finally {
+        theFile.close()
+      }
     }
 
-    val firstList = M3U.parseM3U(firstLines)
-    val secondList = M3U.parseM3U(secondLines)
-
-    val resultList = operation match {
+    def evalOp(firstList, op, secondList): Either[String, M3U] = op match {
       case "union" => Right(M3U.union(firstList, secondList))
       case _ => Left(Messages.unrecognizedOperation)
     }
 
-    // Need to actually use monads (Spooky Scary!)
-    val finalList: Either[String, String] = for {
-      // Checks:
-      // Check args (including operation)
-      // Get sources
-      // Maybe gettings lines
-      // Parsing M3Us
-    }
-
-    // Should probably also have some error handling for this.
-    def finish(list) {
+    /** Trying out a different way of handling the exceptions.
+     * Also, we don't really need the Right result so just using Unit.
+     */
+    def writeContents(list): Either[String, Unit] {
       val newFile = new File(outputListName)
-      val bufferedWriter = new BufferedWriter(new FileWriter(file))
-      bufferedWriter.write(list)
-      bufferedWriter.close()
+      catching(classOf[IOException])
+        .andFinally(newFile.close)
+        .opt({ () =>
+          val bufferedWriter = new BufferedWriter(new FileWriter(file))
+          bufferedWriter.write(list)
+          bufferedWriter
+        }).toRight(String.format(Messages.fileNotFound, filename))
     }
 
-    resultList match {
-      case Right(list) => finish(list)
+    // For more complex CLI it could also return something that would let the rest of the code switch how it is operating.
+    val outputMessage: Either[String, Unit] = for {
+      unused <- 
+      validArgs <- Validate.operatorArgs(args)
+      operation = args(0)
+      firstListName = args(1)
+      secondListName = args(2)
+      outputListName = args(3)
+      firstLines <- getContents(firstListName)
+      secondLines <- getContents(secondListName) 
+      firstList <- M3U.parseM3U(firstLines)
+      secondList <- M3U.parseM3U(secondLines)
+      resultList <- evalOp(firstList, operation, secondList)
+    }
+
+    outputMessage match {
       case Left(msg) => println(msg)
+      case Right(_) =>
     }
   }
 }

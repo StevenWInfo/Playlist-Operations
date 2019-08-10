@@ -55,8 +55,8 @@ object PlaylistSetOperations {
 
     // For more complex CLI it could also return something that would let the rest of the code switch how it is operating.
     val outputMessage: Either[String, Unit] = for {
-      unused <- 
-      validArgs <- Validate.operatorArgs(args)
+      unused <- CommandLine.checkCommand(args)
+      validArgs <- CommandLine.validateArgs(args)
       operation = args(0)
       firstListName = args(1)
       secondListName = args(2)

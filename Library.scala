@@ -3,12 +3,25 @@ package playlistSetOperations
 /*
  * I know I should put most of these in different files.
  * My defense is that it's my first time coding with Scala.
+ * I'll do it later.
  */
 
 /** For dealing with command line stuff.
+ * Wanted to put operation between file names, however
+ * I realized it conflicted with other potential first commands.
+ * Potentially change later.
  */
 object CommandLine {
-  def checkCommand(firstArg): Either[String, Unit] = if (firstArg == "help" || firstArg == "") Left(Messages.help)
+  def checkCommand(args: Array[String]): Either[String, Unit] = if (args.isEmpty() || args(0).toLowerCase() == "help") Left(Messages.help) else Right(())
+
+  def validateArgs(args: Array[String]): Either[String, Array[String]] {
+    val operation = args(0)
+    val firstListName = args(1)
+    val secondListName = args(2)
+    val outputListName = args(3)
+
+    Left("foo")
+  }
 }
 
 /** All the messages that are output.
@@ -65,21 +78,5 @@ object EM3U {
     // Make and EM3U out of generated list of SongData
     //
     // If there's a problem return a Left instead.
-  }
-}
-
-/**
- * Wanted to put operation between file names, however
- * I realized it conflicted with other potential first commands.
- * Potentially change later.
- */
-object Validate {
-  def operatorArgs(args): Either[String, Array[String]] {
-    val operation = args(0)
-    val firstListName = args(1)
-    val secondListName = args(2)
-    val outputListName = args(3)
-
-    Left("foo")
   }
 }

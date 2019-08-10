@@ -18,13 +18,13 @@ import java.io.{FileNotFoundException, IOException}
  */
 
 object PlaylistSetOperations {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
 
     /**
      * Perhaps this and the other functions in here should be in some
      * utility Singleton or something.
      */
-    def getContents(filename: String): Either[String, List[String]] {
+    def getContents(filename: String): Either[String, List[String]] = {
       val theFile = io.Source.fromFile(filename)
       try {
         Right(theFile.getLines().toList().filter(!_.isEmpty()))
@@ -35,7 +35,7 @@ object PlaylistSetOperations {
       }
     }
 
-    def evalOp(firstList, op, secondList): Either[String, M3U] = op match {
+    def evalOp(firstList: List[String], op: String, secondList: List[String]): Either[String, M3U] = op match {
       case "union" => Right(M3U.union(firstList, secondList))
       case _ => Left(Messages.unrecognizedOperation)
     }
@@ -43,7 +43,7 @@ object PlaylistSetOperations {
     /** Trying out a different way of handling the exceptions.
      * Also, we don't really need the Right result so just using Unit.
      */
-    def writeContents(list): Either[String, Unit] {
+    def writeContents(list): Either[String, Unit] = {
       val newFile = new File(outputListName)
       catching(classOf[IOException])
         .andFinally(newFile.close)

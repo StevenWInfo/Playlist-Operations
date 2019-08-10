@@ -14,7 +14,7 @@ package playlistSetOperations
 object CommandLine {
   def checkCommand(args: Array[String]): Either[String, Unit] = if (args.isEmpty() || args(0).toLowerCase() == "help") Left(Messages.help) else Right(())
 
-  def validateArgs(args: Array[String]): Either[String, Array[String]] {
+  def validateArgs(args: Array[String]): Either[String, Array[String]] = {
     val operation = args(0)
     val firstListName = args(1)
     val secondListName = args(2)
@@ -54,8 +54,8 @@ class SongData(info: String, filePath: String) {
 }
 
 object SongData {
-  def parse(info: String, filePath: String): Either[String, SongData] {
-    Right(new SongData(info, filePath)
+  def parse(info: String, filePath: String): Either[String, SongData] = {
+    Right(new SongData(info, filePath))
   }
 }
 
@@ -74,15 +74,20 @@ object EM3U {
 
   val header = "#EXTM3U"
 
-  def parse(fileText: List[String]): Either[String, EM3U] {
+  def parse(fileText: List[String]): Either[String, EM3U] = {
     def checkHeader(lineList: List[String]) = lineList match {
       case head :: body if head == header => Right(Body)
       case head :: body => Left(Messages.malformedEM3U)
       case Nil => Left(Messages.emptyFile)
     }
 
+    def combineParseBody(info: String, song: String, parsedBody: Either[String, List[String]]): Either[String, List[String]] = parseBody match {
+      case Right(list) => SongData.parse(info, song).map(_ :: list)
+      case error => error
+    }
+
     def parseLines(songList: List[String]): Either[String, List[SongData]] = songList match {
-      case info :: song :: body => ((parsedBody: Either[String, List]) => SongData.parse(info, song).map(_ :: parsedBody))(parseLines(body))
+      case info :: song :: body => combineParseBody(info, song, parseLines(body))
       // Should have already checked this case
       case _ :: Nil => Left(Messages.malformedEM3U)
       case Nil => Right(Nil)

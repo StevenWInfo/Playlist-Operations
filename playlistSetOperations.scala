@@ -10,7 +10,8 @@ import java.io.{FileNotFoundException, IOException}
  * If you want to do operations with more than one playlist?
  * Perhaps just do bash piping of strings?
  *
- * Be able to parse m3u, Extended m3U, and maybe m3u8
+ * Be able to eventually parse m3u, Extended m3U, and maybe m3u8.
+ * Potentially be able to parse other playlist formats later.
  *
  * Could probably improve with a command line parser.
  * It's so simple though that it probably doesn't need it.
@@ -26,7 +27,7 @@ object PlaylistSetOperations {
     def getContents(filename: String): Either[String, List[String]] {
       val theFile = io.Source.fromFile(filename)
       try {
-        Right(theFile.getLines().filter(!_.isEmpty()))
+        Right(theFile.getLines().toList().filter(!_.isEmpty()))
       } catch {
         case e: FileNotFoundException => Left(String.format(Messages.fileNotFound, filename))
       } finally {
@@ -63,8 +64,8 @@ object PlaylistSetOperations {
       outputListName = args(3)
       firstLines <- getContents(firstListName)
       secondLines <- getContents(secondListName) 
-      firstList <- M3U.parseM3U(firstLines)
-      secondList <- M3U.parseM3U(secondLines)
+      firstList <- M3U.parse(firstLines)
+      secondList <- M3U.parse(secondLines)
       resultList <- evalOp(firstList, operation, secondList)
     }
 

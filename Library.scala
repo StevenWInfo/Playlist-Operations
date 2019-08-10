@@ -53,6 +53,12 @@ class SongData(info: String, filePath: String) {
   def toFileString(): String = info ++ EM3U.newline ++ filePath
 }
 
+object SongData {
+  def parse(info: String, filePath: String): Either[String, SongData] {
+    Right(new SongData(info, filePath)
+  }
+}
+
 /**
  * Need to figure out set operations. Difficult because these are actually lists and have order. Probably just have it prioritize the order of the first list given.
  */
@@ -68,15 +74,26 @@ object EM3U {
 
   val header = "#EXTM3U"
 
-  def parseEM3U(fileText: String): Either[String, EM3U] {
-    // Check first line for extended
+  def parse(fileText: List[String]): Either[String, EM3U] {
+    def checkHeader(lineList: List[String]) = lineList match {
+      case head :: body if head == header => Right(Body)
+      case head :: body => Left(Messages.malformedEM3U)
+      case Nil => Left(Messages.emptyFile)
+    }
 
-    // Make sure to check for empty lines or other things
-    //
-    // Pass pairs of lines into SongData
-    //
-    // Make and EM3U out of generated list of SongData
-    //
-    // If there's a problem return a Left instead.
+    def parseLines(songList: List[String]): Either[String, List[SongData]] = songList match {
+      case info :: song :: body => ((parsedBody: Either[String, List]) => SongData.parse(info, song).map(_ :: parsedBody))(parseLines(body))
+      // Should have already checked this case
+      case _ :: Nil => Left(Messages.malformedEM3U)
+      case Nil => Right(Nil)
+    }
+
+    for {
+      bodyLines <- checkHeader(fileText)
+      unused2 <- if (bodyLines == Nil) Left(Messages.emptyFile) else Right(())
+      // Unnecessary, but a little more efficient to catch here.
+      unused <- if ((bodyLines.length() % 2) == 1) Left(Messages.malformedEM3U) else Right(())
+      songDataList <- parseLines(bodyLines)
+    } yield EM3U(songDataList)
   }
 }

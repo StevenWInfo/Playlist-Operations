@@ -14,7 +14,10 @@ object Messages {
     Union: Unions two playlists.
     Intersect: Intersects two playlists.
   """
+
   val unrecognizedOperation = "Set operation not recognized. Type in the help command to list all available operations."
+
+  // TODO Need messages for invalid arguments.
 }
 
 class SongData(info: String, filePath: String) {
@@ -30,7 +33,7 @@ class SongData(info: String, filePath: String) {
 class EM3U(songs: List[SongData]) {
   val songs = songs
 
-  def toFileString(): String = EM3U.header + songs.map(song => song.toFileString()).mkString(EM3U.newline)
+  def toFileString(): String = EM3U.header + songs.map(_.toFileString()).mkString(EM3U.newline)
 }
 
 object EM3U {
@@ -40,8 +43,6 @@ object EM3U {
   val header = "#EXTM3U"
 
   def parseEM3U(fileText: String): Either[String, EM3U] {
-    val lines = fileText.split(newline)
-
     // Check first line for extended
 
     // Make sure to check for empty lines or other things
@@ -51,5 +52,16 @@ object EM3U {
     // Make and EM3U out of generated list of SongData
     //
     // If there's a problem return a Left instead.
+  }
+}
+
+object Validate {
+  def args(args): Either[String, Array[String]] {
+    val firstListName = args(0)
+    val operation = args(1)
+    val secondListName = args(2)
+    val outputListName = args(3)
+
+    Left("foo")
   }
 }

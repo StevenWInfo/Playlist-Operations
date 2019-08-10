@@ -1,7 +1,6 @@
 package playlistSetOperations
 
-import java.io.FileWriter
-import java.io.{FileNotFoundException, IOException}
+import java.io.{FileWriter, BufferedWriter, File, FileNotFoundException, IOException}
 
 /*
  * This is my first time writing Scala code so I'm sure that this could probably
@@ -27,7 +26,7 @@ object PlaylistSetOperations {
     def getContents(filename: String): Either[String, List[String]] = {
       val theFile = io.Source.fromFile(filename)
       try {
-        Right(theFile.getLines().toList().filter(!_.isEmpty()))
+        Right(theFile.getLines().toList.filter(!_.isEmpty()))
       } catch {
         case e: FileNotFoundException => Left(String.format(Messages.fileNotFound, filename))
       } finally {
@@ -43,12 +42,12 @@ object PlaylistSetOperations {
     /** Trying out a different way of handling the exceptions.
      * Also, we don't really need the Right result so just using Unit.
      */
-    def writeContents(list): Either[String, Unit] = {
+    def writeContents(outputName: String, list: String): Either[String, Unit] = {
       val newFile = new File(outputListName)
       catching(classOf[IOException])
         .andFinally(newFile.close)
         .opt({ () =>
-          val bufferedWriter = new BufferedWriter(new FileWriter(file))
+          val bufferedWriter = new BufferedWriter(new FileWriter(outputName))
           bufferedWriter.write(list)
           bufferedWriter
         }).toRight(String.format(Messages.fileNotFound, filename))
@@ -64,9 +63,10 @@ object PlaylistSetOperations {
       outputListName = args(3)
       firstLines <- getContents(firstListName)
       secondLines <- getContents(secondListName) 
-      firstList <- M3U.parse(firstLines)
-      secondList <- M3U.parse(secondLines)
+      firstList <- EM3U.parse(firstLines)
+      secondList <- EM3U.parse(secondLines)
       resultList <- evalOp(firstList, operation, secondList)
+      unused <- writeContents(outputListName, resultList)
     }
 
     outputMessage match {

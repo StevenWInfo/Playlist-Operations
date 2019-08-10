@@ -12,7 +12,7 @@ package playlistSetOperations
  * Potentially change later.
  */
 object CommandLine {
-  def checkCommand(args: Array[String]): Either[String, Unit] = if (args.isEmpty() || args(0).toLowerCase() == "help") Left(Messages.help) else Right(())
+  def checkCommand(args: Array[String]): Either[String, Unit] = if (args.isEmpty || (args(0).toLowerCase() == "help")) Left(Messages.help) else Right(())
 
   def validateArgs(args: Array[String]): Either[String, Array[String]] = {
     val operation = args(0)
@@ -43,28 +43,25 @@ object Messages {
 
   val fileNotFound = "Unable to find file %s"
 
+  // Eventually be able to add file name. Need a different monad to do so.
+  val malformedEM3U = "A playlist file is not formatted correctly."
   // TODO Need messages for invalid arguments.
 }
 
-class SongData(info: String, filePath: String) {
-  val info = info
-  val filePath = filePath
-
+case class SongData(info: String, filePath: String) {
   def toFileString(): String = info ++ EM3U.newline ++ filePath
 }
 
 object SongData {
   def parse(info: String, filePath: String): Either[String, SongData] = {
-    Right(new SongData(info, filePath))
+    Right(SongData(info, filePath))
   }
 }
 
 /**
  * Need to figure out set operations. Difficult because these are actually lists and have order. Probably just have it prioritize the order of the first list given.
  */
-class EM3U(songs: List[SongData]) {
-  val songs = songs
-
+case class EM3U(songs: List[SongData]) {
   def toFileString(): String = EM3U.header ++ songs.map(_.toFileString()).mkString(EM3U.newline)
 }
 
@@ -76,13 +73,13 @@ object EM3U {
 
   def parse(fileText: List[String]): Either[String, EM3U] = {
     def checkHeader(lineList: List[String]) = lineList match {
-      case head :: body if head == header => Right(Body)
+      case head :: body if head == header => Right(body)
       case head :: body => Left(Messages.malformedEM3U)
-      case Nil => Left(Messages.emptyFile)
+      case Nil => Left(Messages.malformedEM3U)
     }
 
-    def combineParseBody(info: String, song: String, parsedBody: Either[String, List[String]]): Either[String, List[String]] = parseBody match {
-      case Right(list) => SongData.parse(info, song).map(_ :: list)
+    def combineParseBody(info: String, song: String, parsedBody: Either[String, List[SongData]]): Either[String, List[SongData]] = parsedBody match {
+      case Right(list) => SongData.parse(info, song).map((songData: SongData) => songData :: list)
       case error => error
     }
 
@@ -95,10 +92,21 @@ object EM3U {
 
     for {
       bodyLines <- checkHeader(fileText)
-      unused2 <- if (bodyLines == Nil) Left(Messages.emptyFile) else Right(())
       // Unnecessary, but a little more efficient to catch here.
-      unused <- if ((bodyLines.length() % 2) == 1) Left(Messages.malformedEM3U) else Right(())
+      unused <- if ((bodyLines.length % 2) == 1) Left(Messages.malformedEM3U) else Right(())
       songDataList <- parseLines(bodyLines)
     } yield EM3U(songDataList)
+  }
+
+  /** TODO
+   */
+  def union(first: EM3U, second: EM3U) = {
+    EM3U(List())
+  }
+
+  /** TODO
+   */
+  def intersection(first: EM3U, second: EM3U) = {
+    EM3U(List())
   }
 }

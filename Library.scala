@@ -20,7 +20,8 @@ object CommandLine {
     val secondListName = args(2)
     val outputListName = args(3)
 
-    Left("foo")
+    //Left("foo")
+    Right(args)
   }
 }
 

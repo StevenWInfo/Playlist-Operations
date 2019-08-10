@@ -1,6 +1,7 @@
 package playlistSetOperations
 
 import java.io.{FileWriter, BufferedWriter, File, FileNotFoundException, IOException}
+import scala.util.control.Exception.catching
 
 /*
  * This is my first time writing Scala code so I'm sure that this could probably
@@ -34,8 +35,8 @@ object PlaylistSetOperations {
       }
     }
 
-    def evalOp(firstList: List[String], op: String, secondList: List[String]): Either[String, M3U] = op match {
-      case "union" => Right(M3U.union(firstList, secondList))
+    def evalOp(firstList: EM3U, op: String, secondList: EM3U): Either[String, EM3U] = op match {
+      case "union" => Right(EM3U.union(firstList, secondList))
       case _ => Left(Messages.unrecognizedOperation)
     }
 
@@ -43,14 +44,12 @@ object PlaylistSetOperations {
      * Also, we don't really need the Right result so just using Unit.
      */
     def writeContents(outputName: String, list: String): Either[String, Unit] = {
-      val newFile = new File(outputListName)
+      val newFile = new File(outputName)
+      val bufferedWriter = new BufferedWriter(new FileWriter(newFile))
       catching(classOf[IOException])
-        .andFinally(newFile.close)
-        .opt({ () =>
-          val bufferedWriter = new BufferedWriter(new FileWriter(outputName))
-          bufferedWriter.write(list)
-          bufferedWriter
-        }).toRight(String.format(Messages.fileNotFound, filename))
+        .andFinally(bufferedWriter.close())
+        .opt(bufferedWriter.write(list))
+        .toRight(String.format(Messages.fileNotFound, outputName))
     }
 
     // For more complex CLI it could also return something that would let the rest of the code switch how it is operating.
@@ -66,8 +65,8 @@ object PlaylistSetOperations {
       firstList <- EM3U.parse(firstLines)
       secondList <- EM3U.parse(secondLines)
       resultList <- evalOp(firstList, operation, secondList)
-      unused <- writeContents(outputListName, resultList)
-    }
+      unused <- writeContents(outputListName, resultList.toFileString())
+    } yield unused
 
     outputMessage match {
       case Left(msg) => println(msg)

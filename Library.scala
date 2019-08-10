@@ -14,6 +14,9 @@ package playlistSetOperations
 object CommandLine {
   def checkCommand(args: Array[String]): Either[String, Unit] = if (args.isEmpty || (args(0).toLowerCase() == "help")) Left(Messages.help) else Right(())
 
+  /**
+   * TODO
+   */
   def validateArgs(args: Array[String]): Either[String, Array[String]] = {
     val operation = args(0)
     val firstListName = args(1)
@@ -100,14 +103,24 @@ object EM3U {
   }
 
   /** TODO
+   * Probably more efficient just to deal with these as lists.
    */
-  def union(first: EM3U, second: EM3U) = {
-    EM3U(List())
+  def union(first: EM3U, second: EM3U): EM3U = {
+    second.songs match {
+      case song :: other if !first.songs.contains(song) => union(EM3U(first.songs :+ song), EM3U(other))
+      case song :: other => listUnion(first, EM3U(other))
+      case Nil => first
+    }
   }
 
   /** TODO
+   *  Could make more efficient by removing matches from both rather than just the first.
    */
-  def intersection(first: EM3U, second: EM3U) = {
-    EM3U(List())
+  def intersection(first: EM3U, second: EM3U): EM3U = {
+    first.songs match {
+      case song :: other if second.songs.contains(song) => song :: intersection(EM3U(other), second)
+      case song :: other => intersection(EM3U(other), second)
+      case Nil => first
+    }
   }
 }

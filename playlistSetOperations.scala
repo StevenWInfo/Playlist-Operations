@@ -37,6 +37,7 @@ object PlaylistSetOperations {
 
     def evalOp(firstList: EM3U, op: String, secondList: EM3U): Either[String, EM3U] = op match {
       case "union" => Right(EM3U.union(firstList, secondList))
+      case "intersection" => Right(EM3U.intersection(firstList, secondList))
       case _ => Left(Messages.unrecognizedOperation)
     }
 

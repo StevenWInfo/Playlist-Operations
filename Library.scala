@@ -66,7 +66,7 @@ object SongData {
  * Need to figure out set operations. Difficult because these are actually lists and have order. Probably just have it prioritize the order of the first list given.
  */
 case class EM3U(songs: List[SongData]) {
-  def toFileString(): String = EM3U.header ++ songs.map(_.toFileString()).mkString(EM3U.newline)
+  def toFileString(): String = EM3U.header ++ EM3U.newline ++ songs.map(_.toFileString()).mkString(EM3U.newline)
 }
 
 object EM3U {
@@ -108,7 +108,7 @@ object EM3U {
   def union(first: EM3U, second: EM3U): EM3U = {
     second.songs match {
       case song :: other if !first.songs.contains(song) => union(EM3U(first.songs :+ song), EM3U(other))
-      case song :: other => listUnion(first, EM3U(other))
+      case song :: other => union(first, EM3U(other))
       case Nil => first
     }
   }
@@ -118,7 +118,7 @@ object EM3U {
    */
   def intersection(first: EM3U, second: EM3U): EM3U = {
     first.songs match {
-      case song :: other if second.songs.contains(song) => song :: intersection(EM3U(other), second)
+      case song :: other if second.songs.contains(song) => EM3U(song :: intersection(EM3U(other), second).songs)
       case song :: other => intersection(EM3U(other), second)
       case Nil => first
     }

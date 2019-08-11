@@ -14,7 +14,23 @@ It's also my first time coding with Scala so the code is probably not the cleane
 
 ## Usage
 
-TODO
+```bash
+PlaylistOperations <setOperation> <firstPlaylistFilename> <secondPlaylistFilename>
+```
+
+The current available operations are `union` and `intersection`. As mentioned above, these operations have some quirks because they are based off of the set operations which are unordered whereas these must deal with playlists which are ordered.
+
+TODO add set difference and possibly symmetric difference
+
+### Examples
+
+```bash
+PlaylistOperations union PartyMix.m3u WorkoutMix.m3u HighEnergyMix.m3u
+```
+
+```bash
+PlaylistOperations intersection StudyMix.m3u PartyMix.m3u StudyPartyMix.m3u
+```
 
 ## Installation and Build Instructions
 

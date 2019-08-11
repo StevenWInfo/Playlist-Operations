@@ -6,7 +6,7 @@ object Messages {
   // Probably add complement and/or subtraction.
   val help = """
   Usage:
-    playlistSetOperations <firstPlaylistFilename> <setOperation> <secondPlaylistFilename>
+    playlistSetOperations <setOperation> <firstPlaylistFilename> <secondPlaylistFilename>
 
   Playlists are not strictly sets because they have order to them. Unfortunately this means we have to use some arbitrary ordering rule which may mess up any intentional ordering. It puts the songs in the first list given at the beginning of the result playlist in the order that they appeared in that list, and then gives any songs not in the second list that are not in the first list in the order they appeared in the second list.
 
